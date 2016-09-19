@@ -1,4 +1,6 @@
 #pragma once
+#include <inttypes.h>
+#include <vector>
 
 struct Packet {
 	uint64_t abs_time;
@@ -9,6 +11,8 @@ struct Packet {
 	int port_to;
 };
 
+typedef std::vector<Packet> Packets;
+
 struct PacketParser {
-	virtual std::vector<Packet> parse() = 0;
+	virtual void parse(Packets* const packets) = 0;
 };

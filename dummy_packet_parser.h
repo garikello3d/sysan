@@ -1,3 +1,4 @@
+#pragma once
 #include "packets.h"
 #include <stdlib.h>
 
@@ -18,8 +19,9 @@ public:
 			srandom(0x1234);
 		}
 	
-	virtual std::vector<Packet> parse() {
-		std::vector<Packet> ret;
+	virtual void parse(Packets* const packets) {
+		packets->clear();
+		packets->reserve(m_num);
 		for (int i = 0; i < m_num; i++) {
 			Packet p;
 			p.len = (random() % (m_max_len - 1)) + 1;
@@ -27,6 +29,7 @@ public:
 			p.port_from = m_from_ports[ random() % m_from_ports.size() ];
 			p.ip_to = m_to_ips[ random() % m_to_ips.size() ];
 			p.port_to = m_to_ports[ random() % m_to_ports.size() ];
+			packets->push_back(p);
 		}
 	}
 
