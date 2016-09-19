@@ -8,7 +8,10 @@ enum Carrier { CARR_WIFI, CARR_MOBILE, CARR_ETHER, CARR_LOCAL, CARR_UNKNOWN };
 
 struct Slice {
 	struct App {
+		App(): pid(0) {}
+		
 		struct Connection {
+			Connection(): ip_local(0), port_local(0), ip_remote(0), port_remote(0) {}
 			uint32_t ip_local;
 			int port_local;
 			uint32_t ip_remote;

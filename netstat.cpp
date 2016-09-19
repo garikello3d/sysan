@@ -43,7 +43,7 @@ void fillPacket(const Packet& p, const Slice::Interfaces& ifaces, BoundPacket* c
 		bp->direction = DIR_OUT;
 		bp->carrier = carr;
 	}
-	else if (out_matched && !in_matched) {
+	else if (!out_matched && in_matched) {
 		bp->remote_host = p.ip_from;
 		bp->remote_port = p.port_from;
 		bp->direction = DIR_IN;
@@ -92,27 +92,38 @@ void generatePacketStats(
 	PacketStats* const pstats)
 {
 	pstats->clear();
+	if (slices.empty())
+		return;
 
 	for (Packets::const_iterator it = packets.begin(); it != packets.end(); ++it) {
 		const Packet& p = *it;
 
-		Slices::const_iterator prev_slice = slices.lower_bound(p.abs_time);
-		Slices::const_iterator next_slice = slices.upper_bound(p.abs_time);
-		if (prev_slice == slices.end() || next_slice == slices.end())
+		if (p.abs_time < slices.begin()->first || slices.rbegin()->first < p.abs_time)
 			continue;
 
-		uint64_t distance_from_prev = p.abs_time - prev_slice->first;
-		uint64_t distance_to_next = next_slice->first - p.abs_time;
-		assert(distance_from_prev > 0);
-		assert(distance_to_next > 0);
 		std::vector<Slices::const_iterator> candidates;
+		Slices::const_iterator next_slice = slices.lower_bound(p.abs_time);
+		
+		if (next_slice->first == p.abs_time) { // precise hit
+			candidates.push_back(next_slice);
+		}
+		else { // need to choose
+			Slices::const_iterator prev_slice = next_slice;
+			std::advance(prev_slice, -1);
+			
+			uint64_t distance_from_prev = p.abs_time - prev_slice->first;
+			uint64_t distance_to_next = next_slice->first - p.abs_time;
+			assert(distance_from_prev >= 0);
+			assert(distance_to_next >= 0);
+			assert(distance_to_next + distance_from_prev > 0);
 
-		if (distance_from_prev < distance_to_next) {
-			candidates.push_back(prev_slice);
-			candidates.push_back(next_slice);
-		} else {
-			candidates.push_back(next_slice);
-			candidates.push_back(prev_slice);
+			if (distance_from_prev < distance_to_next) {
+				candidates.push_back(prev_slice);
+				candidates.push_back(next_slice);
+			} else {
+				candidates.push_back(next_slice);
+				candidates.push_back(prev_slice);
+			}
 		}
 		assert(!candidates.empty());
 
@@ -124,10 +135,14 @@ void generatePacketStats(
 		{
 			const Slices::const_iterator& iter = *c;			
 			bound = bindPacket(p, iter->second, true, &bp);
+			if (bound)
+				bp.slice_time = iter->first;
 		}
 
-		if (!bound) // no strict match found on any candidate, perform soft match on first one
+		if (!bound) { // no strict match found on any candidate, perform soft match on first one
 			bindPacket(p, candidates[0]->second, false, &bp);
+			bp.slice_time = candidates[0]->first;
+		}
 
 		pstats->push_back(bp);
 	}
