@@ -2,7 +2,7 @@ LIB=libsysanal.a
 
 SRCS=netstat.cpp
 
-HDRS=netstat.h
+HDRS=netstat.h slices.h packets.h
 
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 
