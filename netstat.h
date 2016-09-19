@@ -3,10 +3,12 @@
 #include "slices.h"
 
 struct BoundPacket {
+	BoundPacket(): len(0), remote_port(0), direction(DIR_UNKNOWN), carrier(CARR_UNKNOWN) {}
+
 	std::string app_name;
 	int len;
 	uint32_t remote_host;
-	int remote_ports;
+	int remote_port;
 	Direction direction;
 	Carrier carrier;
 };
