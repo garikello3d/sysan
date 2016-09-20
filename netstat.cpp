@@ -56,6 +56,8 @@ void fillPacket(const Packet& p, const Slice::Interfaces& ifaces, BoundPacket* c
 		bp->carrier = CARR_LOCAL;
 	}
 	else {
+		bp->remote_host = 0;
+		bp->remote_port = 0;
 		bp->direction = DIR_FORW;
 		bp->carrier = CARR_UNKNOWN;
 	}
@@ -63,7 +65,7 @@ void fillPacket(const Packet& p, const Slice::Interfaces& ifaces, BoundPacket* c
 	bp->len = p.len;
 }
 
-static bool bindPacket(const Packet& p, const Slice& s, bool check_ports, BoundPacket* const bp) {
+bool bindPacket(const Packet& p, const Slice& s, bool check_ports, BoundPacket* const bp) {
 	bool found = false;
 
 	if (check_ports) {
