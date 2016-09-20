@@ -26,7 +26,7 @@ struct S {
 		c3.ip_remote = 0x30303030;
 		c3.port_remote = 3000;
 		
-		c4.ip_local = 0x40404040;
+		c4.ip_local = 0x40404040; // no such addr in interfaces, considering transient connection
 		c4.port_local = 40000;
 		c4.ip_remote = 0xD0D0D0D0;
 		c4.port_remote = 4000;
@@ -45,7 +45,7 @@ struct S {
 
 		Slice s2;
 		s2.apps["a2"] = app1;
-		s2.apps["b2"] = app2;
+		//s2.apps["b2"] = app2;
 		s2.apps["c2"] = app3;
 		s2.apps["d2"] = app4;
 		s2.ifaces = { {0x10101010, CARR_WIFI}, {0x20202020, CARR_MOBILE}, {0x30303030, CARR_ETHER} };
@@ -209,4 +209,60 @@ BOOST_FIXTURE_TEST_CASE(goes_s3_app_unknown_out, S) {
 	BOOST_CHECK_EQUAL(bp.direction, DIR_OUT);
 	BOOST_CHECK_EQUAL(bp.carrier, CARR_WIFI);
 	BOOST_CHECK_EQUAL(bp.slice_time, 300);
+}
+
+BOOST_FIXTURE_TEST_CASE(goes_s2_app4_forward, S) {
+	Packet p;
+	Packets packets;
+
+	p.abs_time = 249;
+	p.len = 9000;
+	p.ip_from = 0xD0D0D0D0;
+	p.port_from = 4000;
+	p.ip_to = 0x40404040;
+	p.port_to = 40000;
+	
+	packets.push_back(p);
+
+	PacketStats pstats;
+	generatePacketStats(packets, slices, &pstats);
+
+	BOOST_CHECK_EQUAL(pstats.size(), 1);
+	const BoundPacket& bp = pstats[0];
+
+	BOOST_CHECK_EQUAL(bp.app_name, "d2");
+	BOOST_CHECK_EQUAL(bp.len, 9000);
+	BOOST_CHECK_EQUAL(bp.remote_host, 0);
+	BOOST_CHECK_EQUAL(bp.remote_port, 0);
+	BOOST_CHECK_EQUAL(bp.direction, DIR_FORW);
+	BOOST_CHECK_EQUAL(bp.carrier, CARR_UNKNOWN);
+	BOOST_CHECK_EQUAL(bp.slice_time, 200);
+}
+
+BOOST_FIXTURE_TEST_CASE(close_to_s2_but_matches_s1, S) {
+	Packet p;
+	Packets packets;
+
+	p.abs_time = 199;
+	p.len = 9100;
+	p.ip_from = 0xB0B0B0B0;
+	p.port_from = 2000;
+	p.ip_to = 0x20202020;
+	p.port_to = 20000;
+	
+	packets.push_back(p);
+
+	PacketStats pstats;
+	generatePacketStats(packets, slices, &pstats);
+
+	BOOST_CHECK_EQUAL(pstats.size(), 1);
+	const BoundPacket& bp = pstats[0];
+
+	BOOST_CHECK_EQUAL(bp.app_name, "b1");
+	BOOST_CHECK_EQUAL(bp.len, 9100);
+	BOOST_CHECK_EQUAL(bp.remote_host, 0xB0B0B0B0);
+	BOOST_CHECK_EQUAL(bp.remote_port, 2000);
+	BOOST_CHECK_EQUAL(bp.direction, DIR_IN);
+	BOOST_CHECK_EQUAL(bp.carrier, CARR_MOBILE);
+	BOOST_CHECK_EQUAL(bp.slice_time, 100);
 }
