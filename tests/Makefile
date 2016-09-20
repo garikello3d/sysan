@@ -4,7 +4,7 @@ SRCS=gen1.cpp
 
 LIB=../libsysanal.a
 
-CFLAGS=-I../
+CFLAGS=-I../ -std=c++11
 LDFLAGS=-lboost_unit_test_framework -L../ -lsysanal
 
 all: $(TARGET)

@@ -6,7 +6,7 @@ HDRS=netstat.h slices.h packets.h
 
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 
-CFLAGS=-g -O0 -Wall
+CFLAGS=-g -O0 -Wall -std=c++11
 
 
 all: $(LIB)
