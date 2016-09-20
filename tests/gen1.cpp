@@ -55,7 +55,7 @@ struct S {
 		s3.apps["b3"] = app2;
 		s3.apps["c3"] = app3;
 		s3.apps["d3"] = app4;
-		s3.ifaces = { {0xA0A0A0A0, CARR_WIFI}, {0x20202020, CARR_MOBILE}, {0x30303030, CARR_ETHER} };
+		s3.ifaces = { {0x10101010, CARR_WIFI}, {0x20202020, CARR_MOBILE}, {0x30303030, CARR_ETHER} };
 
 		slices[100] = s1;
 		slices[200] = s2;
@@ -206,7 +206,7 @@ BOOST_FIXTURE_TEST_CASE(goes_s3_app_unknown_out, S) {
 	BOOST_CHECK_EQUAL(bp.len, 8000);
 	BOOST_CHECK_EQUAL(bp.remote_host, 0xAAAAAAAA);
 	BOOST_CHECK_EQUAL(bp.remote_port, 4567);
-	BOOST_CHECK_EQUAL(bp.direction, DIR_IN);
+	BOOST_CHECK_EQUAL(bp.direction, DIR_OUT);
 	BOOST_CHECK_EQUAL(bp.carrier, CARR_WIFI);
 	BOOST_CHECK_EQUAL(bp.slice_time, 300);
 }
