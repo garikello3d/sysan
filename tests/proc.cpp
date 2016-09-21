@@ -133,4 +133,30 @@ BOOST_AUTO_TEST_CASE(good) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(netparser)
+
+BOOST_AUTO_TEST_CASE(real_proc_net_tcp) {
+	string tcp = "\
+  sl  local_address rem_address   st tx_queue rx_queue tr tm->when retrnsmt   uid  timeout inode\n                                                   \
+   0: 3500007F:0035 00000000:0000 0A 00000000:00000000 00:00000000 00000000   195        0 11912 1 ffff8800d60c0000 99 0 0 10 0\n                    \
+   1: 0100007F:0277 00000000:0000 0A 00000000:00000000 00:00000000 00000000     0        0 13489 1 ffff8802100f0000 99 0 0 10 0\n                    \
+   2: 00000000:14EB 00000000:0000 0A 00000000:00000000 00:00000000 00000000   195        0 11914 1 ffff8800d60c07c0 99 0 0 10 0\n                    \
+   3: 0600A8C0:C068 33A79A95:01BB 01 00000000:00000000 00:00000000 00000000  1000        0 15042 1 ffff8800d3bd0000 25 3 30 10 -1\n                  \
+   4: 0600A8C0:C4A6 D129685F:C8D5 06 00000000:00000000 03:00000BF3 00000000     0        0 0 3 ffff8800c6ef0348\n \
+";
+	
+	ProcNetList list;
+	set<int> inodes { 13489, 15042 };
+	parseProcNets(tcp, inodes, &list);
+
+	BOOST_REQUIRE_EQUAL(list.size(), 2);
+	BOOST_CHECK_EQUAL(list[0].sl, 1);
+	BOOST_CHECK_EQUAL(list[0].local_addr, 0x0100007F);
+	BOOST_CHECK_EQUAL(list[0].local_port, 0x0277);
+	BOOST_CHECK_EQUAL(list[0].remote_addr, 0);
+	BOOST_CHECK_EQUAL(list[0].remote_port, 0);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -21,4 +21,4 @@ void lineParser(const std::string& buf, std::vector<std::string>* const lines);
 bool socketParser(const char* buf, uint32_t* const ip, int* const port);
 
 typedef std::vector<ProcNet> ProcNetList;
-void parseProcNets(const std::string& buf, const std::set<int>& inodes, /*bool tcp_or_udp,*/ ProcNetList* const list);
+void parseProcNets(const std::string& buf, const std::set<int>& inodes, ProcNetList* const list);

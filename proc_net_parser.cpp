@@ -1,5 +1,7 @@
 #include "proc_net_parser.h"
 #include <cstring>
+#include <algorithm>
+#include <cassert>
 
 void lineParser(const std::string& buf, std::vector<std::string>* const lines) {
 	lines->clear();
@@ -44,10 +46,11 @@ bool socketParser(const char* buf, uint32_t* const ip, int* const port) {
 	return sscanf(buf, "%08X:%04X", ip, port) == 2;
 }
 
-void parseProcNets(const std::string& buf, const std::set<int>& inodes, /*bool tcp_or_udp,*/ ProcNetList* const list) {
+void parseProcNets(const std::string& buf, const std::set<int>& inodes, ProcNetList* const list) {
 	std::vector<std::string> lines;
 	std::vector<std::string> parts;
 	lineParser(buf, &lines);
+	int inode_index = -1;
 
 	for (std::vector<std::string>::const_iterator L = lines.begin();
 		 L != lines.end(); ++L)
@@ -55,12 +58,18 @@ void parseProcNets(const std::string& buf, const std::set<int>& inodes, /*bool t
 		lineSplitter(*L, &parts);
 		if (parts.size() < 10)
 			continue;
-		if (parts[0] == "sl") // this is header line
+		if (inode_index == -1) { // this is header line
+			std::vector<std::string>::iterator pi = std::find(parts.begin(), parts.end(), "inode");
+			if (pi == parts.end())
+				return; // no inode column, do nothing
+			inode_index = std::distance(parts.begin(), pi) - 2;
 			continue;
+		}
 
 		ProcNet pn;
 
-		if (sscanf(parts[10].c_str(), "%d", &pn.inode) != 1)
+		assert(inode_index < (int)parts.size() && inode_index > 0);
+		if (sscanf(parts[inode_index].c_str(), "%d", &pn.inode) != 1)
 			continue;
 
 		const std::set<int>::const_iterator ii = inodes.find(pn.inode);
