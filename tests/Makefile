@@ -1,6 +1,6 @@
 TARGET=run_all
 
-SRCS=gen1.cpp
+SRCS=gen1.cpp proc.cpp
 
 LIB=../libsysanal.a
 

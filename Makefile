@@ -1,8 +1,8 @@
 LIB=libsysanal.a
 
-SRCS=netstat.cpp
+SRCS=netstat.cpp proc_net_parser.cpp
 
-HDRS=netstat.h slices.h packets.h
+HDRS=netstat.h slices.h packets.h proc_net_parser.h
 
 OBJS=$(patsubst %.cpp,%.o,$(SRCS))
 

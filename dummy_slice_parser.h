@@ -21,7 +21,7 @@ public:
 		m_remote_ips(remote_ips), m_remote_ports(remote_ports)
 		{
 			srandom(0x5678);
-		}
+		} 
 	
 	virtual parse(Slices* const slices) {
 		for (int i = 0; i < m_nr_slices; i++) {
