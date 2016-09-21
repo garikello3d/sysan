@@ -2,6 +2,7 @@
 #include <set>
 #include <string>
 #include <map>
+#include <vector>
 
 enum Direction { DIR_IN, DIR_OUT, DIR_LOCAL, DIR_FORW, DIR_UNKNOWN };
 enum Carrier { CARR_WIFI, CARR_MOBILE, CARR_ETHER, CARR_LOCAL, CARR_UNKNOWN };

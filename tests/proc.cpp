@@ -2,6 +2,10 @@
 
 #include <boost/test/unit_test.hpp>
 #include "proc_net_parser.h"
+#include "collector.h"
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 using namespace std;
 
 BOOST_AUTO_TEST_SUITE(proc)
@@ -155,6 +159,86 @@ BOOST_AUTO_TEST_CASE(real_proc_net_tcp) {
 	BOOST_CHECK_EQUAL(list[0].local_port, 0x0277);
 	BOOST_CHECK_EQUAL(list[0].remote_addr, 0);
 	BOOST_CHECK_EQUAL(list[0].remote_port, 0);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(collect)
+
+BOOST_AUTO_TEST_SUITE(readfile)
+
+BOOST_AUTO_TEST_CASE(inex_file) {
+	std::string s;
+	BOOST_REQUIRE(!readFile("/niggsz", 1234, &s));
+}
+
+BOOST_AUTO_TEST_CASE(empty_file) {
+	std::string s;
+	system("touch /tmp/somefile");
+	BOOST_REQUIRE(readFile("/tmp/somefile", 1234, &s));
+	BOOST_CHECK(s.empty());
+}
+
+BOOST_AUTO_TEST_CASE(truncated_file) {
+	std::string s;
+	BOOST_REQUIRE(readFile("/etc/services", 4, &s));
+	BOOST_CHECK_EQUAL(s.size(), 4);
+}
+
+BOOST_AUTO_TEST_CASE(all_file) {
+	std::string s;
+	BOOST_REQUIRE(readFile("/etc/hosts", 1024, &s));
+	BOOST_CHECK(s.size() > 0 && s.size() < 512);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(inodes)
+
+BOOST_AUTO_TEST_CASE(wrong_dir) {
+	BOOST_REQUIRE(getSocketInodesInCurrentDir().empty());
+}
+
+BOOST_AUTO_TEST_CASE(good_dir_no_nodes) {
+	chdir("/proc/self/fd");
+	set<int> inodes = getSocketInodesInCurrentDir();
+	BOOST_REQUIRE(inodes.empty());
+}
+
+BOOST_AUTO_TEST_CASE(good_dir_requires_root) {
+	chdir("/proc/1/fd");
+	set<int> inodes = getSocketInodesInCurrentDir();
+	BOOST_REQUIRE(!inodes.empty());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_CASE(real) {
+	Slice s;
+	collectSlice(&s);
+	printf("%d apps:\n", s.apps.size());
+	for (Slice::Apps::const_iterator aa = s.apps.begin();
+		 aa != s.apps.end(); ++aa)
+	{
+		const Slice::App& a = aa->second;
+		if (a.connections.empty())
+			continue;
+		printf("\t%-32s / %d: %d connections:\n", aa->first.c_str(), a.pid, a.connections.size());
+		for (Slice::App::Connections::const_iterator cc = a.connections.begin();
+			 cc != a.connections.end(); ++cc)
+		{
+			char ip1[32], ip2[32];
+			in_addr ina;
+			
+			ina.s_addr = cc->ip_local;
+			strncpy(ip1, inet_ntoa(ina), sizeof(ip1));
+
+			ina.s_addr = cc->ip_remote;
+			strncpy(ip2, inet_ntoa(ina), sizeof(ip2));
+					
+			printf("\t\t%s:%d -> %s:%d\n", ip1, cc->port_local, ip2, cc->port_remote);
+		}
+	}
 }
 
 BOOST_AUTO_TEST_SUITE_END()
