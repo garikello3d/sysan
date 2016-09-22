@@ -169,49 +169,74 @@ BOOST_AUTO_TEST_SUITE(readfile)
 
 BOOST_AUTO_TEST_CASE(inex_file) {
 	std::string s;
-	BOOST_REQUIRE(!readFile("/niggsz", 1234, &s));
+	BOOST_REQUIRE(!readFile("/niggsz", /*1234,*/ &s));
 }
 
 BOOST_AUTO_TEST_CASE(empty_file) {
 	std::string s;
 	system("touch /tmp/somefile");
-	BOOST_REQUIRE(readFile("/tmp/somefile", 1234, &s));
+	BOOST_REQUIRE(readFile("/tmp/somefile", /*1234,*/ &s));
 	BOOST_CHECK(s.empty());
-}
-
-BOOST_AUTO_TEST_CASE(truncated_file) {
-	std::string s;
-	BOOST_REQUIRE(readFile("/etc/services", 4, &s));
-	BOOST_CHECK_EQUAL(s.size(), 4);
 }
 
 BOOST_AUTO_TEST_CASE(all_file) {
 	std::string s;
-	BOOST_REQUIRE(readFile("/etc/hosts", 4096, &s));
+	BOOST_REQUIRE(readFile("/proc/1/cmdline", /*4096,*/ &s));
 	BOOST_CHECK(s.size() > 0 && s.size() < 2048);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END() // readfile
 
 BOOST_AUTO_TEST_SUITE(inodes)
 
 BOOST_AUTO_TEST_CASE(wrong_dir) {
-	BOOST_REQUIRE(getSocketInodesInCurrentDir().empty());
+	BOOST_REQUIRE(getSocketInodes("/fuck nigger").empty());
 }
 
 BOOST_AUTO_TEST_CASE(good_dir_no_nodes) {
-	chdir("/proc/self/fd");
-	set<int> inodes = getSocketInodesInCurrentDir();
+	set<int> inodes = getSocketInodes("/proc/self/fd");
 	BOOST_REQUIRE(inodes.empty());
 }
 
 BOOST_AUTO_TEST_CASE(good_dir_requires_root) {
-	chdir("/proc/1/fd");
-	set<int> inodes = getSocketInodesInCurrentDir();
+	set<int> inodes = getSocketInodes("/proc/1/fd");
 	BOOST_REQUIRE(!inodes.empty());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END() // inodes
+
+static inline const char* carrier2str(Carrier c) {
+	switch (c) {
+		case CARR_WIFI: return "wifi";
+		case CARR_MOBILE: return "mobile";
+		case CARR_ETHER: return "ethernet";
+		case CARR_LOCAL: return "loopback";
+		default: return "unknown";
+	}
+}
+
+std::string dumpInterfaces(const Slice::Interfaces ifaces) {
+	std::string ret("Available interfaces: ");
+	for (Slice::Interfaces::const_iterator i = ifaces.begin(); i != ifaces.end(); ++i) {
+		char ip[32];
+		in_addr ina;
+		
+		ina.s_addr = i->first;
+		strncpy(ip, inet_ntoa(ina), sizeof(ip));
+
+		char tmp[256];
+		snprintf(tmp, sizeof(tmp), "%s(%s) ", ip, carrier2str(i->second), ip);
+
+		ret.append(tmp);
+	}
+	return ret;
+}
+
+BOOST_AUTO_TEST_CASE(ifc) {
+	Slice::Interfaces ifaces;
+	getSystemInterfaces(&ifaces);
+	puts(dumpInterfaces(ifaces).c_str());
+}
 
 BOOST_AUTO_TEST_CASE(real) {
 	Slice s;
@@ -253,8 +278,9 @@ BOOST_AUTO_TEST_CASE(real) {
 			printf("\t\t%s:%d\n", ip, ss->port_listen);
 		}
 	}
+	puts(dumpInterfaces(s.ifaces).c_str());	
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END() // collect
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END() // proc

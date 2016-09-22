@@ -55,6 +55,7 @@ void parseProcNets(const std::string& buf, const std::set<int>& inodes, ProcNetL
 	for (std::vector<std::string>::const_iterator L = lines.begin();
 		 L != lines.end(); ++L)
 	{
+		//printf(">>> line \"%s\"\n", L->c_str());
 		lineSplitter(*L, &parts);
 		if (parts.size() < 10)
 			continue;
@@ -72,6 +73,7 @@ void parseProcNets(const std::string& buf, const std::set<int>& inodes, ProcNetL
 		if (sscanf(parts[inode_index].c_str(), "%d", &pn.inode) != 1)
 			continue;
 
+		//printf("-- search inode %d...", pn.inode);
 		const std::set<int>::const_iterator ii = inodes.find(pn.inode);
 		if (ii == inodes.end())
 			continue;
