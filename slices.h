@@ -19,8 +19,17 @@ struct Slice {
 			int port_remote;
 		};
 
+		struct Server {
+			Server(): ip_listen(0), port_listen(0) {}
+			uint32_t ip_listen;
+			int port_listen;
+		};
+
 		typedef std::vector<Connection> Connections;
 		Connections connections;
+
+		typedef std::vector<Server> Servers;
+		Servers servers;
 
 		std::set<std::string> files;
 		int pid;

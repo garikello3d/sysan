@@ -94,12 +94,19 @@ void collectSlice(Slice* const s) {
 		for (ProcNetList::const_iterator it = conn_list.begin();
 			 it != conn_list.end(); ++it)
 		{
-			Slice::App::Connection c;
-			c.ip_local = it->local_addr;
-			c.port_local = it->local_port;
-			c.ip_remote = it->remote_addr;
-			c.port_remote = it->remote_port;
-			app.connections.push_back(c);
+			if (it->remote_port != 0 && it->remote_addr != 0) {
+				Slice::App::Connection c;
+				c.ip_local = it->local_addr;
+				c.port_local = it->local_port;
+				c.ip_remote = it->remote_addr;
+				c.port_remote = it->remote_port;
+				app.connections.push_back(c);
+			} else {
+				Slice::App::Server s;
+				s.ip_listen = it->local_addr;
+				s.port_listen = it->local_port;
+				app.servers.push_back(s);
+			}
 		}
 
 		s->apps.insert(std::make_pair(app_name, app));

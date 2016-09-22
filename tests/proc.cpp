@@ -187,8 +187,8 @@ BOOST_AUTO_TEST_CASE(truncated_file) {
 
 BOOST_AUTO_TEST_CASE(all_file) {
 	std::string s;
-	BOOST_REQUIRE(readFile("/etc/hosts", 1024, &s));
-	BOOST_CHECK(s.size() > 0 && s.size() < 512);
+	BOOST_REQUIRE(readFile("/etc/hosts", 4096, &s));
+	BOOST_CHECK(s.size() > 0 && s.size() < 2048);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -221,9 +221,11 @@ BOOST_AUTO_TEST_CASE(real) {
 		 aa != s.apps.end(); ++aa)
 	{
 		const Slice::App& a = aa->second;
-		if (a.connections.empty())
+		if (a.connections.empty() && a.servers.empty())
 			continue;
-		printf("\t%-32s / %d: %d connections:\n", aa->first.c_str(), a.pid, a.connections.size());
+
+		printf("\t%-32s / %d:\n", aa->first.c_str(), aa->second.pid);
+
 		for (Slice::App::Connections::const_iterator cc = a.connections.begin();
 			 cc != a.connections.end(); ++cc)
 		{
@@ -237,6 +239,18 @@ BOOST_AUTO_TEST_CASE(real) {
 			strncpy(ip2, inet_ntoa(ina), sizeof(ip2));
 					
 			printf("\t\t%s:%d -> %s:%d\n", ip1, cc->port_local, ip2, cc->port_remote);
+		}
+
+		for (Slice::App::Servers::const_iterator ss = a.servers.begin();
+			 ss != a.servers.end(); ++ss)
+		{
+			char ip[32];
+			in_addr ina;
+			
+			ina.s_addr = ss->ip_listen;
+			strncpy(ip, inet_ntoa(ina), sizeof(ip));
+
+			printf("\t\t%s:%d\n", ip, ss->port_listen);
 		}
 	}
 }
