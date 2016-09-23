@@ -14,22 +14,31 @@
 #include <linux/if_link.h>
 #include <cstring>
 
-bool readFile(const std::string& name, /*int max_size,*/ std::string* const contents) {
+bool readFile(const std::string& name, std::string* const contents) {
 	FILE* f = fopen(name.c_str(), "r");
 	if (!f) return false;
-	const int sz = 65536;
-	std::vector<char> buf(sz);
-	int bytes_read = fread(&buf[0], 1, sz, f);
-	if (bytes_read < 0) {
+
+	char buf[1024];
+	contents->reserve(sizeof(buf));
+	bool ok = true;
+	
+	for (;;) {
+		int bytes_read = fread(buf, 1, sizeof(buf), f);
+		if (bytes_read > 0)
+			contents->append(buf, bytes_read);
+		else if (bytes_read == 0)
+			break;
+		else { // < 0
+			ok = false;
+			break;
+		}
+	}
+	fclose(f);
+
+	if (!ok)
 		contents->clear();
-		fclose(f);
-		return false;
-	}
-	else {
-		contents->assign(&buf[0], bytes_read);
-		fclose(f);
-		return true;
-	}
+
+	return ok;
 }
 
 std::set<int> getSocketInodes(const std::string& fd_path) {
