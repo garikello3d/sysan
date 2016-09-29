@@ -7,7 +7,12 @@ import android.util.Log;
 import java.io.InputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import android.content.Context;
+import android.widget.Button;
+import android.view.View;
 
 public class ExecBinActivity extends Activity {
 	private static final String EXEC_NAME = "id";
@@ -22,9 +27,19 @@ public class ExecBinActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        TextView textView = (TextView) findViewById(R.id.text_view);
-        textView.setText("Hello world!");
     }
+
+	public void storeClicked(View v) {
+		loadAndStoreBinary();
+	}
+
+	public void execClicked(View v) {
+		execBinary(false);
+	}
+
+	public void execRootClicked(View v) {
+		execBinary(true);
+	}
 
 	private boolean loadAndStoreBinary() {
 		InputStream in = null;
@@ -41,9 +56,16 @@ public class ExecBinActivity extends Activity {
 			} while (len > 0);
 			fos.flush();
 			Log.d(TAG, "successfully saved asset file");
+
+			File f = new File(getFilesDir() + "/" + EXEC_NAME);
+			if (f.setExecutable(true))
+				Log.d(TAG, "changed permission to execute");
+			else
+				Log.e(TAG, "could not change permission to execute");
+			
 			return true;
 		} catch (IOException e) {
-			Log.d(TAG, "error reading/saving asset file" + e.getStackTrace());
+			Log.d(TAG, "error reading/saving asset file: " + e.toString());
 			return false;
 		} finally {
 			if (in != null) {
@@ -59,6 +81,24 @@ public class ExecBinActivity extends Activity {
 		}
 	}
 
-	private void execBinary() {
+	private void execBinary(boolean isRoot) {
+		try {
+			String[] args;
+			
+			if (!isRoot)
+				args = new String[]{ getFilesDir() + "/" + EXEC_NAME };
+			else
+				args = new String[]{ "su", "-c", getFilesDir() + "/" + EXEC_NAME };
+			
+			Process p = Runtime.getRuntime().exec(args);
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				Log.d(TAG, "output: " + line);
+			}
+		} catch (IOException e) {
+			Log.e(TAG, "could not execute: " + e.toString());
+		}
 	}
 }

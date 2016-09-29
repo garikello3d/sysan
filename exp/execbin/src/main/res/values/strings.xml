@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Android Gradle</string>
+  <string name="app_name">Android Gradle</string>
+  <string name="store_text">Store</string>
+  <string name="exec_text">Exec</string>
+  <string name="execroot_text">Exec As Root</string>
 </resources>

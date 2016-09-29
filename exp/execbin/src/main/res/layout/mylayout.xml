@@ -4,9 +4,21 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-<TextView
-    android:id="@+id/text_view"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    />
+  
+<Button
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:text="@string/store_text"
+     android:onClick="storeClicked" />
+<Button
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:text="@string/exec_text"
+     android:onClick="execClicked" />
+<Button
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:text="@string/execroot_text"
+     android:onClick="execRootClicked" />
+
 </LinearLayout>

@@ -1,0 +1,5 @@
+.gradle/
+build/
+local.properties
+src/.gradle/
+src/main/java/org/test/execbin/.gradle/
