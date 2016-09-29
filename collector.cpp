@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <linux/if_link.h>
+#include <sys/errno.h>
 #include <cstring>
 
 bool readFile(const std::string& name, std::string* const contents) {
