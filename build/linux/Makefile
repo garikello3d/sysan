@@ -1,5 +1,7 @@
 LIB=libsysanal.a
 
+VPATH=../../
+
 SRCS=collector.cpp netstat.cpp proc_net_parser.cpp
 
 HDRS=netstat.h slices.h packets.h proc_net_parser.h collector.h

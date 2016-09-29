@@ -1,7 +1,2 @@
 doc/*#
-*.o
-*.a
-*.so
-*.so.*
-tests/*.o
-tests/run_all
+
