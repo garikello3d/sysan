@@ -122,7 +122,9 @@ void parseProcNets4_internal(const std::string& buf, const std::set<int>& inodes
 }
 
 void parseProcNets4(const std::string& buf, const std::set<int>& inodes, ProcNetList4* const list) {
+	parseProcNets4_internal(buf, inodes, false, list);
 }
 
 void parseProcNets6(const std::string& buf, const std::set<int>& inodes, ProcNetList4* const list4as6, ProcNetList6* const list6) {
+	parseProcNets4_internal(buf, inodes, true, list4as6);
 }
