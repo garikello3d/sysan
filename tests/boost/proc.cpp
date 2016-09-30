@@ -100,37 +100,77 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(socketparser)
 
+BOOST_AUTO_TEST_SUITE(ipv4)
+
 BOOST_AUTO_TEST_CASE(empty) {
 	uint32_t ip = 0; int port = 0;
-	BOOST_REQUIRE(!socketParser("", &ip, &port));
+	BOOST_REQUIRE(!socketParser("", false, &ip, &port));
 }
 
 BOOST_AUTO_TEST_CASE(no_colon) {
 	uint32_t ip = 0; int port = 0;
-	BOOST_REQUIRE(!socketParser("1232A", &ip, &port));
+	BOOST_REQUIRE(!socketParser("1232A", false, &ip, &port));
 }
 
 BOOST_AUTO_TEST_CASE(bad_ip_len) {
 	uint32_t ip = 0; int port = 0;
-	BOOST_REQUIRE(!socketParser("1234567:1234", &ip, &port));
+	BOOST_REQUIRE(!socketParser("1234567:1234", false, &ip, &port));
 }
 
 BOOST_AUTO_TEST_CASE(bad_both_len) {
 	uint32_t ip = 0; int port = 0;
-	BOOST_REQUIRE(!socketParser("1234567:123", &ip, &port));
+	BOOST_REQUIRE(!socketParser("1234567:123", false, &ip, &port));
 }
 
 BOOST_AUTO_TEST_CASE(bad_syms) {
 	uint32_t ip = 0; int port = 0;
-	BOOST_REQUIRE(!socketParser("123456K8:0123", &ip, &port));
+	BOOST_REQUIRE(!socketParser("123456K8:0123", false, &ip, &port));
 }
 
 BOOST_AUTO_TEST_CASE(good) {
 	uint32_t ip = 0; int port = 0;
-	BOOST_REQUIRE(socketParser("1234567A:123A", &ip, &port));
+	BOOST_REQUIRE(socketParser("1234567A:123A", false, &ip, &port));
 	BOOST_CHECK_EQUAL(ip, 0x1234567A);
 	BOOST_CHECK_EQUAL(port, 0x123A);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(ipv4as6)
+
+BOOST_AUTO_TEST_CASE(empty) {
+	uint32_t ip = 0; int port = 0;
+	BOOST_REQUIRE(!socketParser("", true, &ip, &port));
+}
+
+BOOST_AUTO_TEST_CASE(no_colon) {
+	uint32_t ip = 0; int port = 0;
+	BOOST_REQUIRE(!socketParser("1232A123D", true, &ip, &port));
+}
+
+BOOST_AUTO_TEST_CASE(bad_ip_len) {
+	uint32_t ip = 0; int port = 0;
+	BOOST_REQUIRE(!socketParser("12345675656:1234", true, &ip, &port));
+}
+
+BOOST_AUTO_TEST_CASE(bad_both_len) {
+	uint32_t ip = 0; int port = 0;
+	BOOST_REQUIRE(!socketParser("1234562347:123", true, &ip, &port));
+}
+
+BOOST_AUTO_TEST_CASE(bad_syms) {
+	uint32_t ip = 0; int port = 0;
+	BOOST_REQUIRE(!socketParser("123456K8123456K8123456K8123456K8:0123", true, &ip, &port));
+}
+
+BOOST_AUTO_TEST_CASE(good) {
+	uint32_t ip = 0; int port = 0;
+	BOOST_REQUIRE(socketParser("0000000000000000FFFF0000C36611AC:123A", true, &ip, &port));
+	BOOST_CHECK_EQUAL(ip, 0xC36611AC);
+	BOOST_CHECK_EQUAL(port, 0x123A);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -146,9 +186,9 @@ BOOST_AUTO_TEST_CASE(real_proc_net_tcp) {
    4: 0600A8C0:C4A6 D129685F:C8D5 06 00000000:00000000 03:00000BF3 00000000     0        0 0 3 ffff8800c6ef0348\n \
 ";
 	
-	ProcNetList list;
+	ProcNetList4 list;
 	set<int> inodes { 13489, 15042 };
-	parseProcNets(tcp, inodes, &list);
+	parseProcNets4(tcp, inodes, &list);
 
 	BOOST_REQUIRE_EQUAL(list.size(), 2);
 	BOOST_CHECK_EQUAL(list[0].sl, 1);

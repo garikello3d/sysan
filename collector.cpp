@@ -57,7 +57,7 @@ std::set<int> getSocketInodes(const std::string& fd_path) {
 		if (dent->d_type != DT_LNK)
 			continue;
 
-		char buf[256];
+		char buf[256] = {0};
 		ssize_t ssz = readlink((std::string(fd_path) + "/" + dent->d_name).c_str(), buf, sizeof(buf));
 		if (ssz <= 0)
 			continue;
@@ -130,13 +130,15 @@ void collectSlice(Slice* const s) {
 
 		std::string base_dir = std::string("/proc/") + dent->d_name + "/";
 		std::string app_name;
-		if (!readFile(base_dir + "cmdline", /*256,*/ &app_name))
+		if (!readFile(base_dir + "cmdline", &app_name))
 			continue;
 
 		//printf("app %s:\n", app_name.c_str());
 
-		std::string net_tcp; // TODO handle UDP also
-		if (!readFile(base_dir + "net/tcp", /*16384,*/ &net_tcp))
+		std::string net_tcp4, net_tcp6; // TODO handle UDP also
+		if (!readFile(base_dir + "net/tcp", &net_tcp4))
+			continue;
+		if (!readFile(base_dir + "net/tcp6", &net_tcp6))
 			continue;
 
 		const std::set<int> inodes = getSocketInodes(base_dir + "fd");
@@ -145,12 +147,17 @@ void collectSlice(Slice* const s) {
 		//	printf("%d ", *ino);
 		//putchar('\n');
 
-		ProcNetList conn_list;
-		parseProcNets(net_tcp, inodes, &conn_list);
+		ProcNetList4 conn_list4, conn_list4_as_6;
+		ProcNetList6 conn_list6;
+		parseProcNets4(net_tcp4, inodes, &conn_list4);
+		parseProcNets6(net_tcp6, inodes, &conn_list4_as_6, &conn_list6);
+
+		conn_list4.insert(conn_list4.end(), conn_list4_as_6.begin(), conn_list4_as_6.end());
+		// TODO use IPv6 list also
 		//printf(" %d conns\n", (int)conn_list.size());
 
-		for (ProcNetList::const_iterator it = conn_list.begin();
-			 it != conn_list.end(); ++it)
+		for (ProcNetList4::const_iterator it = conn_list4.begin();
+			 it != conn_list4.end(); ++it)
 		{
 			if (it->remote_port != 0 && it->remote_addr != 0) {
 				Slice::App::Connection c;
