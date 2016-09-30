@@ -1,7 +1,7 @@
 TARGET=run_all
 
 VPATH=../../../:../../
-SRCS=../../gen1.cpp ../../proc.cpp ../../../utility.cpp
+SRCS=../../gen1.cpp ../../proc.cpp ../../ser.cpp ../../../utility.cpp
 
 LIBDIR=../../../../build/linux
 LIB=$(LIBDIR)/libsysanal.a
