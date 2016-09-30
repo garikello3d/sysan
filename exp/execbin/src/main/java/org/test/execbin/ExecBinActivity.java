@@ -15,8 +15,10 @@ import android.widget.Button;
 import android.view.View;
 
 public class ExecBinActivity extends Activity {
-	private static final String EXEC_NAME = "id";
-	private static final String TAG = "ExecBin";
+	private static final String EXEC_NAME = "collector_backend"; //id";
+	private static final String LIB1_NAME = "libsysanal.so";
+	private static final String LIB2_NAME = "libgnustl_shared.so";
+	private static final String TAG = "Collector";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,7 +32,11 @@ public class ExecBinActivity extends Activity {
     }
 
 	public void storeClicked(View v) {
-		loadAndStoreBinary();
+		loadAndStoreBinary(EXEC_NAME, false);
+		loadAndStoreBinary(LIB2_NAME, true);
+		loadAndStoreBinary(LIB1_NAME, true);
+		//System.loadLibrary("gnustl_shared");
+		//System.loadLibrary("sysanal");
 	}
 
 	public void execClicked(View v) {
@@ -41,13 +47,13 @@ public class ExecBinActivity extends Activity {
 		execBinary(true);
 	}
 
-	private boolean loadAndStoreBinary() {
+	private boolean loadAndStoreBinary(String filename, boolean loadlib) {
 		InputStream in = null;
 		FileOutputStream fos = null;
 		byte[] buf = new byte[65536];
 		try {
-			fos = openFileOutput(EXEC_NAME, Context.MODE_PRIVATE);
-			in = getAssets().open(EXEC_NAME);
+			fos = openFileOutput(filename, Context.MODE_PRIVATE);
+			in = getAssets().open(filename);
 			int len;
 			do {
 				len = in.read(buf);
@@ -57,11 +63,18 @@ public class ExecBinActivity extends Activity {
 			fos.flush();
 			Log.d(TAG, "successfully saved asset file");
 
-			File f = new File(getFilesDir() + "/" + EXEC_NAME);
-			if (f.setExecutable(true))
-				Log.d(TAG, "changed permission to execute");
-			else
-				Log.e(TAG, "could not change permission to execute");
+			String full_name = getFilesDir() + "/" + filename;
+			File f = new File(full_name);
+			if (!loadlib) {
+				if (f.setExecutable(true))
+					Log.d(TAG, "changed permission to execute");
+				else
+					Log.e(TAG, "could not change permission to execute");
+			}
+			else {
+				System.load(full_name);
+				Log.d(TAG, "loaded library " + full_name);
+			}
 			
 			return true;
 		} catch (IOException e) {
@@ -81,22 +94,41 @@ public class ExecBinActivity extends Activity {
 		}
 	}
 
+	private void outStream(InputStream str, String prefix) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(str));
+		String line;
+		while ((line = reader.readLine()) != null) {
+			Log.d(TAG, prefix + ": " + line);
+		}
+	}
+
 	private void execBinary(boolean isRoot) {
 		try {
 			String[] args;
+			Log.d(TAG, "starting binary");
 			
 			if (!isRoot)
 				args = new String[]{ getFilesDir() + "/" + EXEC_NAME };
 			else
 				args = new String[]{ "su", "-c", getFilesDir() + "/" + EXEC_NAME };
-			
-			Process p = Runtime.getRuntime().exec(args);
 
-			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			String line;
-			while ((line = reader.readLine()) != null) {
-				Log.d(TAG, "output: " + line);
+			String[] env = new String[]{ "LD_LIBRARY_PATH=" + getFilesDir() };
+				//	"LD_LIBRARY_PATH=/data/app/org.test.execbin-1/lib/arm64:/data/app/org.test.execbin-2/lib/arm64" };
+			
+			Process p = Runtime.getRuntime().exec(args, env);
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				Log.d(TAG, "sleep interrupted");
 			}
+			
+			p.destroy();
+			
+			//outStream(p.getInputStream(), "output");
+			//outStream(p.getErrorStream(), "errors");
+
+			Log.d(TAG, "finished binary");
 		} catch (IOException e) {
 			Log.e(TAG, "could not execute: " + e.toString());
 		}

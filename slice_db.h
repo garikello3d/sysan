@@ -1,10 +1,26 @@
 #pragma once
+
+#ifdef __ANDROID__
+#include <string>
+#include <sstream>
+namespace std {
+	template < typename T > std::string to_string( const T& n )
+    {
+        std::ostringstream stm ;
+        stm << n ;
+        return stm.str() ;
+    }
+}
+#endif
+
 #include <cereal/types/map.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/string.hpp>
 #include <cereal/types/set.hpp>
 #include <cereal/archives/binary.hpp>
 #include "slices.h"
+
+
 
 template <class Archive> inline void serialize(
 	Archive& archive, Slice::App::Connection& conn)

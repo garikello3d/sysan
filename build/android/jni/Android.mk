@@ -12,5 +12,6 @@ FILE_LIST := \
 LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../android
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH_)/../../../
+LOCAL_CPP_FEATURES := rtti exceptions
 
 include $(BUILD_SHARED_LIBRARY)
