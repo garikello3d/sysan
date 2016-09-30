@@ -10,6 +10,7 @@ FILE_LIST := \
 	$(wildcard $(LOCAL_PATH)/$(SRC_BASE)/android/*.cpp)
 
 LOCAL_SRC_FILES := $(FILE_LIST:$(LOCAL_PATH)/%=%)
-LOCAL_C_INCLUDES := ../../../android
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../android
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH_)/../../../
 
 include $(BUILD_SHARED_LIBRARY)

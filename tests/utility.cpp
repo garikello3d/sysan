@@ -20,7 +20,7 @@ std::string dumpInterfaces(const Slice::Interfaces ifaces) {
 		strncpy(ip, inet_ntoa(ina), sizeof(ip));
 
 		char tmp[256];
-		snprintf(tmp, sizeof(tmp), "%s(%s) ", ip, carrier2str(i->second), ip);
+		snprintf(tmp, sizeof(tmp), "%s(%s) ", ip, carrier2str(i->second));
 
 		ret.append(tmp);
 	}
@@ -30,7 +30,7 @@ std::string dumpInterfaces(const Slice::Interfaces ifaces) {
 void enumerateAppsAndConns() {
 	Slice s;
 	collectSlice(&s);
-	printf("%d apps:\n", s.apps.size());
+	printf("%d apps:\n", (int)s.apps.size());
 	for (Slice::Apps::const_iterator aa = s.apps.begin();
 		 aa != s.apps.end(); ++aa)
 	{
