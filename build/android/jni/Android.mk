@@ -14,4 +14,5 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../android
 LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH_)/../../../
 LOCAL_CPP_FEATURES := rtti exceptions
 
-include $(BUILD_SHARED_LIBRARY)
+#include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_STATIC_LIBRARY)

@@ -20,5 +20,10 @@
      android:layout_width="match_parent"
      android:text="@string/execroot_text"
      android:onClick="execRootClicked" />
+<Button
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:text="@string/stop_text"
+     android:onClick="stopClicked" />
 
 </LinearLayout>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">SysAnalyzer</string>
+  <string name="query">Query Backend State</string>
+  <string name="be_status_running">Running</string>
+  <string name="be_status_idle">Idle</string>
+  <string name="start_stop_start">Start Backend</string>
+  <string name="start_stop_stop">Stop Backend</string>
+</resources>
