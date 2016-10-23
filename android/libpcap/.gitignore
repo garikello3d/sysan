@@ -42,3 +42,5 @@ selpolltest
 tokdefs.h
 version.c
 version.h
+libs
+obj
