@@ -9,7 +9,7 @@ libpcap_cflags := \
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-  pcap-linux.c pcap-usb-linux.c pcap-can-linux.c pcap-netfilter-linux.c pcap-netfilter-linux-android.c \
+  pcap-linux.c pcap-usb-linux.c pcap-netfilter-linux.c pcap-netfilter-linux-android.c \
   fad-gifc.c \
   pcap.c inet.c gencode.c optimize.c nametoaddr.c etherent.c \
   savefile.c sf-pcap.c sf-pcap-ng.c pcap-common.c \
