@@ -1,5 +1,6 @@
 #pragma once
 #include <thread>
+#include <cassert>
 
 class WorkerObserver {
 public:
