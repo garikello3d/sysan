@@ -27,6 +27,4 @@ private:
 	const std::string m_outFile;
 	volatile bool m_exit;
 	uint64_t m_nrPackets;
-
-	//const int PACKET_TIMEOUT_MS = 1000; // 1 sec
 };

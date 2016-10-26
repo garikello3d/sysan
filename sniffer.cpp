@@ -34,14 +34,6 @@ bool Sniffer::init() {
 		return false;
 	}
 
-	/*status = pcap_set_timeout(m_pcap, PACKET_TIMEOUT_MS);
-	if (status != 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap_set_timeout failed: %s",
-			pcap_statustostr(status));
-		signalError(ebuf);
-		return false;
-	}*/
-
 	status = pcap_activate(m_pcap);
 	if (status < 0) {
 		snprintf(ebuf, sizeof(ebuf), "pcap_activate error: %s/%s",
@@ -71,6 +63,7 @@ bool Sniffer::init() {
 
 void Sniffer::deinit() {
 	if (m_dumper) {
+		pcap_dump_flush(m_dumper);
 		pcap_dump_close(m_dumper);
 		m_dumper = NULL;
 	}
