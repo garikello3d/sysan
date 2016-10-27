@@ -3,6 +3,7 @@ package org.igor.sysanal;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Handler;
 import android.widget.TextView;
 import android.widget.Button;
 import android.util.Log;
@@ -21,7 +22,16 @@ public class SysAnalActivity extends Activity {
 	
 	private SysAnalService mService = null;
 	private boolean mIsBackendRunning = false;
+	private Handler mHandler = new Handler();
+	private static final int STATUS_QUERY_EVERY_SEC = 1;
 
+	private Runnable mPeriodicCode = new Runnable() {
+			@Override
+			public void run() {
+				queryBackendState(null);
+				mHandler.postDelayed(mPeriodicCode, STATUS_QUERY_EVERY_SEC * 1000);
+			}
+		};
 	
 	@Override
     public void onCreate(Bundle saved) {
@@ -48,6 +58,17 @@ public class SysAnalActivity extends Activity {
 				mConnection,
 				Context.BIND_AUTO_CREATE);
 		}
+    }
+
+	@Override
+    protected void onResume() {
+        super.onResume();
+		mHandler.postDelayed(mPeriodicCode, STATUS_QUERY_EVERY_SEC * 1000);
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+		mHandler.removeCallbacks(mPeriodicCode);
     }
 
 	@Override
