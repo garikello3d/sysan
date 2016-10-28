@@ -1,4 +1,7 @@
 #include "file_packet_parser.h"
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <netinet/udp.h>
 using namespace std;
 
 FilePacketParser::FilePacketParser(
@@ -91,5 +94,44 @@ void FilePacketParser::packetCallback(
 bool FilePacketParser::parseIpAndAbove(
 	int link_type, const uint8_t* data, size_t size, Packet* const packet)
 {
+	if (link_type == DLT_IPV4) {
+		if (size < sizeof(ip))
+			return false;
+		const ip* iph = reinterpret_cast<const ip*>(data);
+		if (iph->ip_v != IPVERSION)
+			return false; // shouldn't be here, but check
+		if (iph->ip_off != 0)
+			return false; // we don't handle fragments yet
+		packet->ip_from = iph->ip_src.s_addr;
+		packet->ip_to = iph->ip_dst.s_addr;
+		return parseTransport(iph->ip_p, data + sizeof(ip), size - sizeof(ip), packet);
+	}
+	else {
+		packet->ip_from = 0;
+		packet->port_from = 0;
+		packet->ip_to = 0;
+		packet->port_to = 0;
+	}
+	return true;
+}
+
+// static
+bool FilePacketParser::parseTransport(
+	uint8_t proto, const uint8_t* data, size_t size, Packet* const packet)
+{
+	if(proto == 6) {
+		if (size < sizeof(tcphdr))
+			return false;
+		const tcphdr* tcph = reinterpret_cast<const tcphdr*>(data);
+		packet->port_from = ntohs(tcph->source);
+		packet->port_to = ntohs(tcph->dest);
+	}
+	else if (proto == 17) {
+		if (size < sizeof(udphdr))
+			return false;
+		const udphdr* udph = reinterpret_cast<const udphdr*>(data);
+		packet->port_from = ntohs(udph->source);
+		packet->port_to = ntohs(udph->dest);
+	}
 	return true;
 }
