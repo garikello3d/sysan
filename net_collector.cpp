@@ -37,6 +37,8 @@ void NetCollector::runUntilStopOrError() {
 		Slice slice;
 		collectSlice(&slice);
 		cereal::BinaryOutputArchive oarchive(ss);
+
+		// TODO/FIXME add time!
 		oarchive(slice);
 		const string& buf = ss.str();
 

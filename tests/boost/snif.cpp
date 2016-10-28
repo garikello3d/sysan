@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_SUITE(snif)
 
 BOOST_AUTO_TEST_CASE(no_perm) {
 	JustStoreObserver ob;
-	Worker* w = new Sniffer(&ob, "eth0", 100, "/tmp/packets.pcap");
+	Worker* w = new Sniffer(&ob, "eth0", "/tmp/packets.pcap");
 	BOOST_REQUIRE(!w->spawnUntilStopOrError());
 	w->stopAndDeinit();
 	delete w;
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(no_perm) {
 
 BOOST_AUTO_TEST_CASE(capture_by_root) {
 	JustStoreObserver ob;
-	Sniffer* w = new Sniffer(&ob, "any", 100, "/tmp/packets.pcap");
+	Sniffer* w = new Sniffer(&ob, "any", "/tmp/packets.pcap");
 	BOOST_REQUIRE(w->spawnUntilStopOrError());
 	sleep(3);
 	w->stopAndDeinit();
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(capture_by_root) {
 
 BOOST_AUTO_TEST_CASE(nothing_by_root) {
 	JustStoreObserver ob;
-	Sniffer* w = new Sniffer(&ob, "eth6", 100, "/tmp/packets.pcap");
+	Sniffer* w = new Sniffer(&ob, "eth6", "/tmp/packets.pcap");
 	BOOST_REQUIRE(w->spawnUntilStopOrError());
 	sleep(2);
 	w->stopAndDeinit();
