@@ -14,17 +14,14 @@ protected:
 	std::string startPseudoCapture(Packets* const packets);
 
 private:
-	struct CaptureContext {
-		CaptureContext(Packets* const pacs, int dlt, int prec):
-			packets(pacs), datalink_type(dlt), precision(prec) {}
-		Packets* const packets;
-		const int datalink_type; // some of DLT_XXX from bpf.h
-		const int precision;
-	};
-	
 	static void packetCallback(unsigned char *user, const pcap_pkthdr *h, const unsigned char *sp);
 	static bool parseIpAndAbove(int link_type, const uint8_t* data, size_t size, Packet* const packet);
 	static bool parseTransport(uint8_t proto, const uint8_t* data, size_t size, Packet* const packet);
+
+	int datalinkType() const;
+	int precision() const;
+	int limit() const;
+	pcap_t* pcap() const;
 
 	const std::string m_file;
 	const int m_limit;

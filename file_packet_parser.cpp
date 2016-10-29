@@ -60,10 +60,10 @@ void FilePacketParser::deinitPcap() {
 }
 
 string FilePacketParser::startPseudoCapture(Packets* const packets) {
-	CaptureContext ctx(packets, pcap_datalink(m_pcap), m_precision);
+	pair<FilePacketParser*, Packets* const> user_data(this, packets);
 
 	int status = pcap_loop(m_pcap, -1, packetCallback,
-		reinterpret_cast<unsigned char*>(&ctx));
+		reinterpret_cast<unsigned char*>(&user_data));
 
 	if (status == -1) {
 		char buf[256];
@@ -78,16 +78,19 @@ string FilePacketParser::startPseudoCapture(Packets* const packets) {
 void FilePacketParser::packetCallback(
 	unsigned char *user, const pcap_pkthdr *h, const unsigned char *sp)
 {
-	CaptureContext* ctx = reinterpret_cast<CaptureContext*>(user);
+	pair<FilePacketParser*, Packets* const>* user_data =
+		reinterpret_cast<pair<FilePacketParser*, Packets* const>* >(user);
+	FilePacketParser* clazz = user_data->first;
+	Packets* packets = user_data->second;
 
 	Packet p;
 	const uint64_t microsec = (uint64_t)h->ts.tv_sec * 1000000 + (uint64_t)h->ts.tv_usec;
-	p.abs_time = microsec % (1000000 / ctx->precision);
+	p.abs_time = microsec % (1000000 / clazz->precision());
 	p.len = h->len;
 
 	// NOTE sp starts from link-level header
-	if (parseIpAndAbove(ctx->datalink_type, sp, h->caplen, &p))
-		ctx->packets->push_back(p);
+	if (parseIpAndAbove(clazz->datalinkType(), sp, h->caplen, &p))
+		packets->push_back(p);
 }
 
 // static
