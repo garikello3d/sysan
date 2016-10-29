@@ -13,6 +13,8 @@ protected:
 	virtual void flagStop();
 
 private:
+	uint64_t currentTime() const;
+
 	const int m_everySec;
 	const std::string m_outFile;
 	volatile bool m_exit;

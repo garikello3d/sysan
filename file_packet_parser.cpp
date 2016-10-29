@@ -6,8 +6,8 @@ using namespace std;
 
 FilePacketParser::FilePacketParser(
 	const std::string& file, int limit, int precision_to_sec)
-	: m_file(file), m_limit(limit), m_precision(precision_to_sec),
-	  m_pcap(NULL), m_datalink(0), m_nrCaptured(0)
+	: m_file(file), m_limit(limit > 0 ? limit : __INT_MAX__),
+	  m_precision(precision_to_sec), m_pcap(NULL), m_datalink(0), m_nrCaptured(0)
 {
 }
 
@@ -23,34 +23,11 @@ string FilePacketParser::parse(Packets* const packets) {
 
 string FilePacketParser::initPcap() {
 	char ebuf[PCAP_ERRBUF_SIZE] = {0};
-	//int status;
 
 	m_pcap = pcap_open_offline(m_file.c_str(), ebuf);
-	if (!m_pcap) {
+	if (!m_pcap)
 		return string(ebuf);
-	}
-
-	/*status = pcap_set_snaplen(m_pcap, 65536);
-	if (status != 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap_set_snaplen failed: %s",
-			pcap_statustostr(status));
-		return string(ebuf);
-		}*/
-
-	/*status = pcap_activate(m_pcap);
-	if (status < 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap_activate error: %s/%s",
-			pcap_statustostr(status), pcap_geterr(m_pcap));
-		return string(ebuf);
-	}
-	else if (status > 0) {
-		snprintf(ebuf, sizeof(ebuf), "pcap_activate warning: %s/%s",
-			pcap_statustostr(status), pcap_geterr(m_pcap));
-		return string(ebuf);
-		}*/
-
 	m_datalink = pcap_datalink(m_pcap);
-
 	return string();
 }
 

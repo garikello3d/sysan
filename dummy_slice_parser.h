@@ -23,7 +23,7 @@ public:
 			srandom(0x5678);
 		} 
 	
-	virtual parse(Slices* const slices) {
+	virtual bool parse(Slices* const slices) {
 		for (int i = 0; i < m_nr_slices; i++) {
 			Slice s;
 
@@ -45,6 +45,7 @@ public:
 			
 			slices->insert(std::make_pair(i * m_time_per_slice, s));
 		}
+		return true;
 	}
 
 private:

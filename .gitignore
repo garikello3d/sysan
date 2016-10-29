@@ -1,2 +1,4 @@
 doc/*#
 
+/report/linux/report
+/tests/boost/bench.pcap

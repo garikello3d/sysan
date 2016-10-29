@@ -87,8 +87,8 @@ int main(int argc, const char** const argv) {
 		return 2;
 	}
 
-	workers[SNIFFER_IDX] = new Sniffer(&observer, "any",  std::string(UPLOAD_DIR) + "dump.pcap");
-	workers[NETSTAT_IDX] = new NetCollector(&observer, 1, std::string(UPLOAD_DIR) +  "net.pcap");
+	workers[SNIFFER_IDX] = new Sniffer(&observer, "any",  std::string(UPLOAD_DIR) +  "dump.anal");
+	workers[NETSTAT_IDX] = new NetCollector(&observer, 1, std::string(UPLOAD_DIR) +  "net.anal");
 
 	tolog(true, "starting all workers");
 	bool failed = false;

@@ -12,7 +12,8 @@ BOOST_AUTO_TEST_CASE(tcp) {
 	FilePacketParser p("../../tcp.pcap", 2, 100000);
 	Packets packets;
 	string err = p.parse(&packets);
-	
+
+	BOOST_REQUIRE(err.empty());
 	BOOST_REQUIRE_EQUAL(packets.size(), 2);
 	const Packet p1 = packets[0];
 	const Packet p2 = packets[1];
@@ -36,7 +37,8 @@ BOOST_AUTO_TEST_CASE(udp) {
 	FilePacketParser p("../../udp.pcap", 2, 100000);
 	Packets packets;
 	string err = p.parse(&packets);
-	
+
+	BOOST_REQUIRE(err.empty());
 	BOOST_REQUIRE_EQUAL(packets.size(), 2);
 	const Packet p1 = packets[0];
 	const Packet p2 = packets[1];
@@ -60,7 +62,8 @@ BOOST_AUTO_TEST_CASE(icmp) {
 	FilePacketParser p("../../icmp.pcap", 1, 100000);
 	Packets packets;
 	string err = p.parse(&packets);
-	
+
+	BOOST_REQUIRE(err.empty());
 	BOOST_REQUIRE_EQUAL(packets.size(), 1);
 	const Packet p1 = packets[0];
 	
@@ -70,6 +73,16 @@ BOOST_AUTO_TEST_CASE(icmp) {
 	BOOST_CHECK_EQUAL(p1.ip_to, ntohl(0xb948e70e));
 	BOOST_CHECK_EQUAL(p1.port_from, 0);
 	BOOST_CHECK_EQUAL(p1.port_to, 0);
+}
+
+BOOST_AUTO_TEST_CASE(bench) {
+	FilePacketParser p("../../bench.pcap", 0, 1000000);
+	Packets packets;
+	string err = p.parse(&packets);
+	if (!err.empty())
+		printf("error in bench parse: %s\n", err.c_str());
+	else
+		printf("paresed %d packets", (int)packets.size());
 }
 
 BOOST_AUTO_TEST_SUITE_END();

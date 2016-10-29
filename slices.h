@@ -45,5 +45,5 @@ struct Slice {
 typedef std::map<uint64_t, Slice> Slices;
 
 struct SliceParser {
-	virtual void parse(Slices* const slices) = 0;
+	virtual bool parse(Slices* const slices) = 0;
 };

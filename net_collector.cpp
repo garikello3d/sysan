@@ -38,7 +38,7 @@ void NetCollector::runUntilStopOrError() {
 		collectSlice(&slice);
 		cereal::BinaryOutputArchive oarchive(ss);
 
-		// TODO/FIXME add time!
+		oarchive(currentTime());
 		oarchive(slice);
 		const string& buf = ss.str();
 
@@ -58,4 +58,10 @@ void NetCollector::runUntilStopOrError() {
 
 void NetCollector::flagStop() {
 	m_exit = true;
+}
+
+uint64_t NetCollector::currentTime() const {
+	timeval tv;
+	gettimeofday(&tv, NULL);
+	return (uint64_t)tv.tv_sec*1000000 + (uint64_t)tv.tv_usec;
 }
