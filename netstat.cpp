@@ -1,4 +1,5 @@
 #include "netstat.h"
+#include "query.h"
 #include <cassert>
 
 bool checkPacketStrictMatch(const Packet& p, const Slice::App::Connection& c, BoundPacket* const bp) {
@@ -147,5 +148,50 @@ void generatePacketStats(
 		}
 
 		pstats->push_back(bp);
+	}
+}
+
+void generateAppStats(const PacketStats& ps,
+	AppsActivity* const ai, RemotesInfo* const ri)
+{
+	ai->clear();
+	ri->clear();
+	
+	for (PacketStats::const_iterator p = ps.begin(); p != ps.end(); ++p) {
+		Remote remote;
+		remote.host = p->remote_host;
+		remote.port = p->remote_port;
+
+		RemoteInfo rinfo;
+		if (p->remote_port == 443)
+			rinfo.is_ssl = true;
+		ri->insert(std::make_pair(remote.host, rinfo));
+		
+		if (p->direction == DIR_IN) {
+			(*ai)[p->app_name].remote_traffic[remote].downloaded += p->len;
+			(*ai)[p->app_name].carrier_traffic[p->carrier].downloaded += p->len;
+		}
+		else if (p->direction == DIR_OUT) {
+			(*ai)[p->app_name].remote_traffic[remote].uploaded += p->len;
+			(*ai)[p->app_name].carrier_traffic[p->carrier].uploaded += p->len;
+		}
+		else if (p->direction == DIR_FORW) {
+			(*ai)[p->app_name].remote_traffic[remote].transit += p->len;
+			(*ai)[p->app_name].carrier_traffic[p->carrier].transit += p->len;
+		}
+		else if (p->direction == DIR_LOCAL) {
+			(*ai)[p->app_name].remote_traffic[remote].internal += p->len;
+			(*ai)[p->app_name].carrier_traffic[p->carrier].internal += p->len;
+		}
+		else {
+			(*ai)[p->app_name].remote_traffic[remote].unknown += p->len;
+			(*ai)[p->app_name].carrier_traffic[p->carrier].unknown += p->len;
+		}
+	}
+
+	for (RemotesInfo::iterator r = ri->begin(); r != ri->end(); ++r) {
+		r->second.domain = getDomainByIpOnline(r->first);
+		if (r->second.is_ssl)
+			r->second.ssl = getSslSubject(r->first);
 	}
 }

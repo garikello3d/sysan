@@ -2,7 +2,7 @@ LIB=libsysanal.a
 
 VPATH=../../
 
-SRCS=file_slice_parser.cpp file_packet_parser.cpp collector.cpp netstat.cpp proc_net_parser.cpp sniffer.cpp
+SRCS=query.cpp netstat.cpp file_slice_parser.cpp file_packet_parser.cpp collector.cpp proc_net_parser.cpp sniffer.cpp
 
 HDRS=netstat.h slices.h slice_db.h packets.h proc_net_parser.h collector.h sniffer.h worker.h
 
